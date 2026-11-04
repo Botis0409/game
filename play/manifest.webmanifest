@@ -1,6 +1,6 @@
 {
-  "name": "Cercul",
-  "short_name": "Cercul",
+  "name": "Reader Demo",
+  "short_name": "Reader",
   "start_url": "./index.html",
   "display": "fullscreen",
   "orientation": "landscape",

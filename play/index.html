@@ -6,10 +6,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Cercul">
+<meta name="apple-mobile-web-app-title" content="Reader Demo">
 <meta name="theme-color" content="#1d2b22">
-<title>Cercul — play the demo</title>
-<meta property="og:title" content="Cercul — play the demo">
+<title>Reader Demo — play</title>
+<meta property="og:title" content="Reader Demo — play">
 <meta property="og:description" content="A game you play by reading. Turn your phone sideways, tap the screen to fly.">
 <meta property="og:image" content="https://ticketing-platform.online/media/thumbnail.jpg">
 <link rel="manifest" href="manifest.webmanifest">
@@ -28,33 +28,37 @@
 </head>
 <body>
 <canvas id="unity-canvas" tabindex="-1"></canvas>
-<div id="loader"><div id="title">Cercul</div><div id="bar"><div id="fill"></div></div><div id="msg"></div></div>
+<div id="loader"><div id="title">Reader Demo</div><div id="bar"><div id="fill"></div></div><div id="msg"></div></div>
 <script>
   var canvas = document.querySelector("#unity-canvas");
-  var config = {
-    dataUrl: "Build/Web.data.unityweb?v=1793819226",
-    frameworkUrl: "Build/Web.framework.js.unityweb?v=1793819226",
-    codeUrl: "Build/Web.wasm.unityweb?v=1793819226",
-    streamingAssetsUrl: "StreamingAssets",
-    companyName: "Cercul",
-    productName: "Cercul",
-    productVersion: "0.1.0",
-    devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
-  };
-  var script = document.createElement("script");
-  script.src = "Build/Web.loader.js?v=1793819226";
-  script.onload = function () {
-    createUnityInstance(canvas, config, function (p) {
-      document.querySelector("#fill").style.width = (100 * p) + "%";
-    }).then(function (instance) {
-      document.querySelector("#loader").style.display = "none";
-      window.unityInstance = instance;
-    }).catch(function (message) {
-      document.querySelector("#msg").textContent = String(message);
-      console.error(message);
-    });
-  };
-  document.body.appendChild(script);
+  var CDN = "https://cdn.jsdelivr.net/gh/Botis0409/game@r20261104-2110/play/";
+  var LOCAL = "";
+  var fill = document.querySelector("#fill"), msg = document.querySelector("#msg");
+  function cfg(base) {
+    return {
+      dataUrl: base + "Build/Web.data.unityweb",
+      frameworkUrl: base + "Build/Web.framework.js.unityweb",
+      codeUrl: base + "Build/Web.wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Reader",
+      productName: "Reader Demo",
+      productVersion: "r20261104-2110",
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+    };
+  }
+  function boot(base, isFallback) {
+    createUnityInstance(canvas, cfg(base), function (p) { fill.style.width = (100 * p) + "%"; })
+      .then(function (instance) { document.querySelector("#loader").style.display = "none"; window.unityInstance = instance; })
+      .catch(function (message) {
+        if (!isFallback) { console.warn("CDN load failed, retrying from the site:", message); fill.style.width = "0%"; boot(LOCAL, true); return; }
+        msg.textContent = String(message);
+        console.error(message);
+      });
+  }
+  function loadScript(src, ok, fail) { var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = fail; document.body.appendChild(s); }
+  loadScript(CDN + "Build/Web.loader.js",
+    function () { boot(CDN, false); },
+    function () { loadScript(LOCAL + "Build/Web.loader.js", function () { boot(LOCAL, true); }, function () { msg.textContent = "Could not load the game."; }); });
   document.addEventListener("gesturestart", function (e) { e.preventDefault(); });
 </script>
 </body>
