@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cercul — a game you play by reading</title>
+<meta name="description" content="Cercul is a reading game for 3rd graders: every sentence on screen is an instruction. Read it, then do it — fly a griffin, become an ant. Playable demo in the browser.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cercul — a game you play by reading">
+<meta property="og:description" content="Every sentence on screen is an instruction. Read it, then do it: fly a griffin over the meadow, then crawl as an ant through the picnic. Playable demo.">
+<meta property="og:image" content="https://botis0409.github.io/game/media/thumbnail.jpg">
+<meta property="og:url" content="https://botis0409.github.io/game/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1d2b22">
+<link rel="icon" href="play/icon.png">
+<link rel="apple-touch-icon" href="play/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --bg: #f6f3e8; --fg: #1d2b22; --muted: #5b6a5f; --card: #ffffff; --line: #e3dfd0;
+    --green: #3f8a3a; --green-deep: #2f6d2d; --sky: #cfe8f5; --gold: #f4b63a; --gold-deep: #c98a10; --red: #d8463a;
+    --radius: 18px; --shadow: 0 10px 30px rgba(29,43,34,.10);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Nunito", -apple-system, "Segoe UI", sans-serif; font-size: 17px; line-height: 1.6; }
+  h1, h2, h3 { font-family: "Fredoka", "Nunito", sans-serif; font-weight: 600; line-height: 1.1; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(56px, 11vw, 112px); font-weight: 700; letter-spacing: -0.5px; }
+  h2 { font-size: clamp(30px, 4.6vw, 46px); }
+  h3 { font-size: 24px; }
+  p { margin: 0; }
+  a { color: var(--green-deep); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+  section { padding-block: clamp(56px, 8vw, 104px); }
+  .eyebrow { display: inline-block; font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--green-deep); background: rgba(63,138,58,.12); padding: 6px 12px; border-radius: 999px; }
+  .lead { font-size: clamp(19px, 2.2vw, 23px); color: var(--muted); max-width: 46ch; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 19px; padding: 15px 26px; border-radius: 999px; text-decoration: none; transition: transform .12s ease, box-shadow .12s ease; }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-play { background: var(--gold); color: #3a2a05; box-shadow: 0 8px 22px rgba(201,138,16,.35); }
+  .btn-play:hover { box-shadow: 0 12px 28px rgba(201,138,16,.45); }
+  .btn-ghost { background: var(--card); color: var(--fg); border: 2px solid var(--line); }
+  .btn svg { width: 22px; height: 22px; }
+
+  /* hero */
+  .hero { position: relative; overflow: hidden; background: linear-gradient(180deg, #d9edf7 0%, #e9f3ea 55%, var(--bg) 100%); padding-block: clamp(48px, 8vw, 96px) 0; }
+  .hero .wrap { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(24px, 4vw, 56px); align-items: center; }
+  .hero-copy { display: grid; gap: 22px; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .hero-note { font-size: 15px; color: var(--muted); }
+  .hero-shot { position: relative; border-radius: 26px; overflow: hidden; box-shadow: 0 30px 70px rgba(29,43,34,.22); background: #000; aspect-ratio: 1200 / 555; transform: rotate(-1.2deg); }
+  .hero-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .hero-shot .sentence { position: absolute; left: 50%; top: 10%; transform: translateX(-50%); background: rgba(20,32,25,.72); color: #fff; font-family: "Fredoka", sans-serif; font-size: clamp(16px, 2.4vw, 24px); padding: 8px 18px; border-radius: 14px; white-space: nowrap; backdrop-filter: blur(4px); }
+  .hero-shot .sentence b { color: var(--gold); font-weight: 600; }
+  .meadow-strip { height: 40px; margin-top: clamp(28px, 5vw, 56px); background: linear-gradient(180deg, transparent, var(--bg)); }
+
+  /* how */
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 36px; }
+  .card { background: var(--card); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); display: grid; gap: 12px; align-content: start; }
+  .card .num { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 20px; color: #fff; background: var(--green); }
+  .card p { color: var(--muted); }
+  .card .q { font-family: "Fredoka", sans-serif; font-size: 20px; color: var(--fg); background: #f1f5ec; padding: 10px 14px; border-radius: 12px; border-left: 4px solid var(--gold); }
+  .card .q b { color: var(--gold-deep); font-weight: 600; }
+
+  /* level */
+  .level { background: #ffffff; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 48px); margin-top: 36px; }
+  .life { display: grid; gap: 16px; align-content: start; }
+  .life .tag { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .sentences { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .sentences li { font-family: "Fredoka", sans-serif; font-size: 21px; padding: 10px 16px; background: #f6f3e8; border-radius: 12px; }
+  .sentences li span { font-family: "Nunito", sans-serif; font-size: 13px; color: var(--muted); display: inline-block; min-width: 26px; }
+  .sentences b { color: var(--gold-deep); font-weight: 600; }
+  .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
+  .gallery figure { margin: 0; border-radius: 16px; overflow: hidden; background: #000; box-shadow: var(--shadow); }
+  .gallery img { width: 100%; aspect-ratio: 16 / 7.4; object-fit: cover; display: block; }
+  .gallery figcaption { font-family: "Fredoka", sans-serif; font-size: 17px; padding: 10px 14px; background: #1d2b22; color: #fff; }
+  .gallery figcaption b { color: var(--gold); font-weight: 600; }
+
+  /* why */
+  .why .wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(28px, 5vw, 64px); align-items: center; }
+  .why p + p { margin-top: 16px; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .stat { background: var(--card); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+  .stat .n { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 42px; color: var(--green-deep); line-height: 1; }
+  .stat .l { color: var(--muted); font-size: 15px; margin-top: 6px; }
+
+  /* video */
+  .video { background: #1d2b22; color: #fff; }
+  .video .lead { color: #c9d6cc; }
+  .video video { width: 100%; border-radius: 20px; margin-top: 28px; box-shadow: 0 30px 70px rgba(0,0,0,.4); background: #000; aspect-ratio: 16 / 9; }
+
+  /* next */
+  .next ul { margin: 18px 0 0; padding-left: 20px; color: var(--muted); }
+  .next li { margin: 6px 0; }
+  .cta { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+
+  footer { border-top: 1px solid var(--line); padding-block: 28px 44px; color: var(--muted); font-size: 15px; }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+
+  @media (max-width: 860px) {
+    .hero .wrap, .two, .why .wrap { grid-template-columns: 1fr; }
+    .cards, .gallery { grid-template-columns: 1fr; }
+    .gallery { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 520px) {
+    .hero-shot { transform: none; }
+    .gallery { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="eyebrow">Playable demo · 3rd grade reading</span>
+      <h1>Cercul</h1>
+      <h2>A game you play by reading.</h2>
+      <p class="lead">Every sentence on screen is an instruction. The child reads it, then does it — flying a griffin over a meadow, then crawling as an ant through its own picnic. The words are the controls.</p>
+      <div class="hero-actions">
+        <a class="btn btn-play" href="play/">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          Play the demo
+        </a>
+        <a class="btn btn-ghost" href="#video">Watch the video</a>
+      </div>
+      <p class="hero-note">Runs in the browser, nothing to install. Best on a phone held sideways. One level, about three minutes.</p>
+    </div>
+    <div class="hero-shot">
+      <img src="media/shot-castle-ring.jpg" alt="The griffin flying through a gold ring towards the castle on a floating island; the sentence on screen reads: Go up. Find the castle." width="1200" height="555">
+    </div>
+  </div>
+  <div class="meadow-strip"></div>
+</header>
+
+<section class="how">
+  <div class="wrap">
+    <span class="eyebrow">How it works</span>
+    <h2 style="margin-top:14px">Read it. Then do it.</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="num">1</div>
+        <h3>A sentence appears</h3>
+        <div class="q">Fly <b>over</b> the <b>water</b>.</div>
+        <p>Short sentences built from the most frequent words in English, with the words being learned lit up in gold.</p>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <h3>The child does it</h3>
+        <div class="q">Find the <b>tree</b> by the <b>water</b>.</div>
+        <p>Tap where to go. The griffin flies there. A sentence that was understood, not just sounded out, moves the game forward.</p>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <h3>The world is the reward</h3>
+        <div class="q">Go <b>down</b> to the <b>ants</b>.</div>
+        <p>No points, no timers. The level ends with the list of words the child just read. Reading more is the only way to see more.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="level">
+  <div class="wrap">
+    <span class="eyebrow">The demo level</span>
+    <h2 style="margin-top:14px">One level, two lives.</h2>
+    <div class="two">
+      <div class="life">
+        <div class="tag">First you are a griffin</div>
+        <ul class="sentences">
+          <li><span>1</span>Fly <b>over</b> the <b>water</b>.</li>
+          <li><span>2</span>Go <b>up</b>. Find the <b>castle</b>.</li>
+          <li><span>3</span>Find the <b>tree</b> by the <b>water</b>.</li>
+          <li><span>4</span>Go <b>down</b> to the <b>tree</b>.</li>
+          <li><span>5</span>Look <b>down</b>. Find the <b>ant</b>.</li>
+        </ul>
+      </div>
+      <div class="life">
+        <div class="tag">Then you become an ant</div>
+        <ul class="sentences">
+          <li><span>6</span>Get the <b>rice</b>.</li>
+          <li><span>7</span>Go <b>into</b> the <b>hole</b>.</li>
+          <li><span>8</span>Go <b>down</b> to the <b>ants</b>.</li>
+          <li><span>9</span>Get one <b>more</b>. Do <b>not</b> go in the <b>water</b>.</li>
+          <li><span>10</span>Get one <b>more</b>. Go <b>up</b> the <b>leaf</b>.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="gallery">
+      <figure><img src="media/shot-fly-castle.jpg" alt="Griffin flying over the meadow with the castle island ahead" loading="lazy"><figcaption>Go <b>up</b>. Find the <b>castle</b>.</figcaption></figure>
+      <figure><img src="media/shot-find-tree.jpg" alt="The purple tree by the river" loading="lazy"><figcaption>Find the <b>tree</b> by the <b>water</b>.</figcaption></figure>
+      <figure><img src="media/shot-perched.jpg" alt="The griffin perched on a branch above the picnic" loading="lazy"><figcaption>Look <b>down</b>. Find the <b>ant</b>.</figcaption></figure>
+      <figure><img src="media/shot-ant-rice.jpg" alt="The ant picking up a grain of rice" loading="lazy"><figcaption>Get the <b>rice</b>.</figcaption></figure>
+      <figure><img src="media/shot-ant-hole.jpg" alt="The ant entering the ant hill" loading="lazy"><figcaption>Go <b>into</b> the <b>hole</b>.</figcaption></figure>
+      <figure><img src="media/shot-tunnel.jpg" alt="Inside the tunnel with worker ants" loading="lazy"><figcaption>Go <b>down</b> to the <b>ants</b>.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="why">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Why words, not buttons</span>
+      <h2 style="margin:14px 0 20px">Half of everything ever written</h2>
+      <p>The 100 most frequent words in English make up about half of all printed text. A child who recognises them instantly reads fluently; a child who still stops at <i>the</i>, <i>down</i> and <i>into</i> guesses, and falls behind in every subject.</p>
+      <p>Cercul is built on exactly those words. In the game the sentence is not a caption — it is the control. A child who cannot read it cannot play; a child who reads it, plays. The motivation to read is the same motivation every kid already has: to see what happens next.</p>
+      <p>The demo is the first level of a world. Each level adds a handful of words; the sentences grow with the child.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat"><div class="n">10</div><div class="l">sentences in the demo level</div></div>
+      <div class="stat"><div class="n">22</div><div class="l">different words, read about 50 times by the end</div></div>
+      <div class="stat"><div class="n">~3</div><div class="l">minutes to play, any phone, no install</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">bodies: a griffin in the sky, an ant in the grass</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="video" id="video">
+  <div class="wrap">
+    <span class="eyebrow" style="background:rgba(244,182,58,.18);color:var(--gold)">Gameplay video</span>
+    <h2 style="margin-top:14px">The whole level in one take</h2>
+    <p class="lead">Recorded from the game itself: read, tap, fly, land, dig, ride.</p>
+    <video controls playsinline preload="metadata" poster="media/poster.jpg">
+      <source src="media/cercul-demo.mp4" type="video/mp4">
+      Your browser cannot play this video. <a href="media/cercul-demo.mp4">Download it</a> instead.
+    </video>
+    <p class="hero-note" style="margin-top:14px;color:#9fb3a4">1:48, no sound. In a hurry? <a href="media/cercul-trailer.mp4" style="color:var(--gold)">The 52-second cut</a> · <a href="media/cercul-demo.mp4" download style="color:var(--gold)">Download the full video</a> (20 MB)</p>
+  </div>
+</section>
+
+<section class="next">
+  <div class="wrap">
+    <span class="eyebrow">What this is, and what comes next</span>
+    <h2 style="margin-top:14px">A prototype you can hold</h2>
+    <p class="lead" style="margin-top:16px">This is a working build, not a mock-up: one complete level, real controls, running in a browser on a phone. It exists to show the idea in your hands.</p>
+    <ul>
+      <li>More levels and more words — the next worlds reuse the griffin and the ant, so each level is mostly new sentences, not new engineering.</li>
+      <li>Reading before playing: a short word check that chooses which sentences a child gets next.</li>
+      <li>Native apps for iOS and Android (the same build already runs on both).</li>
+    </ul>
+    <div class="cta">
+      <a class="btn btn-play" href="play/">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        Play the demo
+      </a>
+      <span class="hero-note">Tip: on a phone, turn it sideways and tap the screen to fly.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Cercul · investor demo · 2026</span>
+    <span>Tudor Cociș &amp; Bogdan Micu · Brașov</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cercul">
+<meta name="theme-color" content="#1d2b22">
+<title>Cercul — play the demo</title>
+<meta property="og:title" content="Cercul — play the demo">
+<meta property="og:description" content="A game you play by reading. Turn your phone sideways, tap the screen to fly.">
+<meta property="og:image" content="https://botis0409.github.io/game/media/thumbnail.jpg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #1d2b22;
+    touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; overscroll-behavior: none; }
+  #unity-canvas { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; background: #1d2b22; outline: none; }
+  #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 22px; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: radial-gradient(circle at 50% 40%, #2f4a35, #142019); }
+  #title { font-size: 44px; font-weight: 700; letter-spacing: 1px; }
+  #bar { width: 46vw; max-width: 420px; height: 10px; border-radius: 5px; background: rgba(255,255,255,.18); overflow: hidden; }
+  #fill { width: 0; height: 100%; background: #f5cf4d; transition: width .2s; }
+  #msg { font-size: 14px; opacity: .75; max-width: 80vw; text-align: center; }
+</style>
+</head>
+<body>
+<canvas id="unity-canvas" tabindex="-1"></canvas>
+<div id="loader"><div id="title">Cercul</div><div id="bar"><div id="fill"></div></div><div id="msg"></div></div>
+<script>
+  var canvas = document.querySelector("#unity-canvas");
+  var config = {
+    dataUrl: "Build/Web.data.unityweb?v=1793819226",
+    frameworkUrl: "Build/Web.framework.js.unityweb?v=1793819226",
+    codeUrl: "Build/Web.wasm.unityweb?v=1793819226",
+    streamingAssetsUrl: "StreamingAssets",
+    companyName: "Cercul",
+    productName: "Cercul",
+    productVersion: "0.1.0",
+    devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+  };
+  var script = document.createElement("script");
+  script.src = "Build/Web.loader.js?v=1793819226";
+  script.onload = function () {
+    createUnityInstance(canvas, config, function (p) {
+      document.querySelector("#fill").style.width = (100 * p) + "%";
+    }).then(function (instance) {
+      document.querySelector("#loader").style.display = "none";
+      window.unityInstance = instance;
+    }).catch(function (message) {
+      document.querySelector("#msg").textContent = String(message);
+      console.error(message);
+    });
+  };
+  document.body.appendChild(script);
+  document.addEventListener("gesturestart", function (e) { e.preventDefault(); });
+</script>
+</body>
+</html>
